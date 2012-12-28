@@ -1,0 +1,201 @@
+\documentclass[preprint]{aastex}
+
+\usepackage{comment}
+
+\begin{document}
+\title{LSST SN Realizer}
+
+\section{Desired Features}
+We need a supernova realizer.
+
+A supernova (including its local environment) is characterized observationally by
+its coordinates (RA, Dec, [radial distance], peculiar velocity) and the luminosity as a
+function of observer MJD and restframe wavelength.  This set of information must be
+made available in the realization.  A potentially useful structure to contain and convey
+this information is an SED that gives luminosity as a function of wavelength; though
+not necessarily the responsibility of the realizer, useful operations for redshifting,
+renormalization, multiplication of transmission functions, and flux calculations
+are done at the spectrum level.
+
+Different kinds of Type Ia supernovae can be realized:
+There are many
+supernova models so choose from, already within the LSST DESC there is interest
+in implementing four different models and there are plenty of others in the larger community.
+It is often useful to realize a ``real'' supernova, for example putting a SN1991bg clone
+at $z=0.3$ via an unparameterized model of that supernova. Note that for an observed
+supernova the luminosity is not known though $\cal{M}$ is.
+These same models may be used later in the fitting of data later in the pipeline.
+
+There are different contexts in which a supernova can be realized:
+Supernovae that explode within an input galaxy and time window;
+Supernovae that explode within an input volume and time window
+with or without reference to the host galaxies.  Different sets of supernova
+realizations for a single set of coordinates, 
+swapping the model for example.
+A corollary is that supernova and host-galaxy realizations can be intertwined.
+
+The realizer will be used for several applications.  The LSST Project needs to include
+supernovae in their catalog and pixel-level simulations.  The DESC needs to realize
+supernovae to calculate statistical and systematic uncertainties, for mission optimization,
+and other planning purposes.  Though not a requirement, it would be great
+if the realizer could be easily run by the community at large.
+The realizer can be run within a larger simulation pipeline or standalone.
+
+Different applications will want to draw coordinates (RA, dec, peculiar velocities) in different ways.
+Studies of SN cosmology uncertainties don't need RA and Dec information. Image simulations don't require outputs that associate galaxies and supernovae. Catalog simulations can need associations between supernovae and their hosts.  Given a galaxy, we may want supernovae
+that it hosts.  Given a volume, we may want to realize supernovae and their host galaxies.
+
+In a single realization, we want to maintain the same set of objects independent of how and how
+many times the supernovae are accessed.  For example a user can request all supernovae in some volume and time window A, and then for the same universe request  all supernovae in
+the volume and time window B.  We want the same logical return in both calls for supernovae in the intersection of A and B.
+
+The LSST Project stands out as an early user, it is therefore important
+to consider how they plan to interact with the realizer.
+For example,
+they have memory constraints so the time-evolving SED information must be contained in an efficient way (model parameters and a seed?).
+
+Pixel-level simulations will cycle through simulated supernovae contained with
+the field of individual CCDs.
+
+Most often the realizer will be part of a simulation framework.  There are therefore
+some conditions it should satisfy:
+\begin{itemize}
+\item Can be run within the LSST Project simulation framework.
+\item Can be run within the DESC simulation.
+\item Realizations are reproducible.
+\item Persistence mechanism.
+\item Parameters are configurable.
+\end{itemize}
+The design should consider that this will be a useful tool for the larger community.
+
+
+Output fluxes can be used for different purposes:
+\begin{itemize}
+\item Determine incident fluxes above the atmosphere.
+\item Integrated fluxes in passbands.
+\item Realize of observations.
+\item Model data.
+\end{itemize}
+
+
+\section{Design}
+\subsection{Simulation Interface for SN Realizations}
+This section addresses the interface between simulators and realizers.
+
+Users can realize and/or access a realized
+universe (i.e.\ the SNe and host galaxies in that
+universe) by choosing one amongst a suite of realizers and specifying
+the parameters needed to specify the realization.  This is accomplished through a
+{\bf Registry}.
+
+The user is exposed to a realized universe through a registry interface as
+\begin{verbatim}
+RealizedUniverse Registry.getUniverse(RealizerName, RealizerParameters)
+\end{verbatim}
+where the RealizerName and RealizerParameters contain the set of information (including seed) needed
+to deterministically define the objects in the universe.   RealizerParameters is also
+a good place to specify code version.
+
+The {\bf Registry} allows dynamic access to  {\bf Realizer}s by containing
+an instantiated object for each, including 
+pre-packaged ones and those that are user-defined.  Users include their {\bf Realizer}s
+through
+an  ASCII file that contains the 
+python code path.
+We baseline ConfigObj for the format convention since it is the standard used by
+LSST Project and
+this code will be implemented in Python (no need for portability).
+
+Construction of the {\bf Realizer} should be light-weight as
+the {\bf Registry} has an object for each  {\bf Realizer}.
+The {\bf Realizer} satisfies the following interface:
+\begin{verbatim}
+RealizedUniverse Realizer.getUniverse(RealizerParameters)
+Map Realizer.parameters
+\end{verbatim}
+getUniverse() is executed by {\bf Registry} when a {\bf RealizedUniverse} is requested.
+The user can use the parameters() command to get the names of parameters and
+default values for initialization.  We anticipate that one {\bf Realizer} implementation
+will obtain sources that are preloaded into a database.
+
+The {\bf RealizedUniverse} represents a single realization of sources in the universe.
+Each source has an immutable unique integer label per RealizedUniverse.
+All independent queries return objects from the same underlying set; for example two
+queries of objects in different sky areas will return the same objects in the overlap
+region.  We anticipate accessors useful for users:
+\begin{verbatim}
+Iterator RealizedUniverse.getSNe()
+Iterator RealizedUniverse.getSNe(logical selection of SN parameters) //eg RA/Dec/time range
+Source RealizedUniverse.getSN(int)
+  /* Similar accessors for host galaxies */
+\end{verbatim}
+Generally each kind of {\bf Realizer}s will have an associated {\bf RealizedUniverse}
+with optimization of source retrieval.
+
+The {\bf Source}s are supernovae and host galaxies that contain the information
+needed by simulators.  
+The following includes the API needed for simulations, though we
+eventually want to use the same object for uses other than just simulation.
+\begin{verbatim}
+/* Minimum set for simulations */
+double Source.getRA(), getDec()
+double Source.getSurfaceBrightness(MJD, Wavelength)
+SED Source.getSurfaceBrightness(MJD,)
+double Source.getObservedRedshift()
+Source[] Source.getAssociatedSources() //host galaxy, hosted SNe
+String Source.getType()
+/* More for general usage */
+Model Source.getModel()
+\end{verbatim}
+
+
+\section{Framework}
+Useful to have
+\begin{itemize}
+\item PDF for coordinates and SN parameters.
+\end{itemize}
+
+We may want a default persistence mechanism.  We may want a toString() method. or export
+to JSM, XML.
+
+\begin{comment}
+\subsection{}
+\begin{enumerate}
+\item Configuration controllable at the top-level executable:  The supernova realizer
+will be used within 
+\item SED
+\item Supernova
+\item Supernova Model
+\item Realization from pdf
+\end{enumerate}
+
+The following are functionality and design choices that we anticipate wanting for the realizer:
+\begin{itemize}
+\item Supernovae provided through an iterator.
+\item Access to a supernova through descriptor. 
+\item Common descriptor for all objects with common deterministic behavior.
+\item Immutable.
+\end{itemize}
+
+\subsection{Registry Implementation}
+There is a registry which provides access to supernova realizer.
+
+There is only one registry object, otherwise there is ambiguity.
+\begin{verbatim}
+class Registry
+    Map registry              // map between String and realizer objects
+    register(String)            // registers a new realizer
+    getRegister(String)     // return selected register
+    init()                       // initialize Map with official and user-supplied registers
+\end{verbatim}
+
+Each Realizer to be registered must satisfy the interface
+\begin{verbatim}
+interface Register
+    String getName()     // the official name, also used in the Registry Map
+\end{verbatim}
+	
+
+\end{comment}
+
+\end{document}
