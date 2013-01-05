@@ -124,8 +124,8 @@ All independent queries return objects from the same underlying set; for example
 queries of objects in different sky areas will return the same objects in the overlap
 region.  We anticipate accessors useful for users:
 \begin{verbatim}
-Iterator RealizedUniverse.getSNe()
-Iterator RealizedUniverse.getSNe(logical selection of SN parameters) //eg RA/Dec/time range
+Iterator<Source> RealizedUniverse.getSNe()
+Iterator<Source> RealizedUniverse.getSNe(logical selection of SN parameters) //eg RA/Dec/time range
 Source RealizedUniverse.getSN(int)
   /* Similar accessors for host galaxies */
 \end{verbatim}
