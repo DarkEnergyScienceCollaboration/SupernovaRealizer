@@ -13,17 +13,18 @@ class TabularSED(object):
     classdocs
     '''
 
+    parameter_names=[]
+    
     @staticmethod
     def ascii2pkl(name):
-        name='data/test.dat'
         table=asciitable.read(name,delimiter="\s")
         points=numpy.zeros((len(table),2))
         for i in xrange(len(table)):
             points[i]=(table.col1[i],table.col2[i])
         values=table.col3
-        f = open(name+'pkl', 'wb')
-        pickle.dump(points,f,pickle.HIGHEST_PROTOCOL)
-        pickle.dump(values,f,pickle.HIGHEST_PROTOCOL)
+        out=dict([('points', points), ('values', values)])
+        f = open(name+'.pkl', 'wb')
+        pickle.dump(out,f,pickle.HIGHEST_PROTOCOL)
         f.close()
         
     def __init__(self, name):
@@ -31,13 +32,11 @@ class TabularSED(object):
         Constructor
         '''
         self.name=name
+        self.table=None
         
-        table=asciitable.read(name)
-        
-        #internal data members
-        self.points= (table[0],table[1])
-        self.values= table[2]
         
     def luminosity(self, phase, wavelength):
-        
-        return griddata(self.points, self.values, (phase,wavelength), method = 'linear')
+        if (self.table is None):
+            f=open(self.name+'.pkl','rb')
+            self.table=pickle.load(f)
+        return griddata(self.table['points'], self.table['values'], (phase,wavelength), method = 'linear')
