@@ -22,8 +22,8 @@ class Supernova(object):
         self.host=host
         self.id=id
         
-    def luminosity(self,date,wavelength):
-        return self.model.luminosity((date-self.doe)/(1+self.redshift),wavelength)
+    def luminosity(self,obsdate,restwavelength):
+        return self.model.luminosity((obsdate-self.doe)/(1+self.redshift),restwavelength)
     
 class Galaxy(object):
     

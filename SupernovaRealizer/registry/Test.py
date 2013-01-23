@@ -30,7 +30,7 @@ if __name__ == '__main__':
     for galaxy in galaxies:
         print 'Galaxy id ',galaxy.id
         for sn in realizer.realize(galaxy):
-            print '   Supernova ',sn.ra, sn.dec, sn.redshift, sn.doe, sn.id
+            print '   Supernova ',sn.ra, sn.dec, sn.redshift, sn.doe, sn.id, sn.luminosity(sn.doe+30,5000)
     
 
     

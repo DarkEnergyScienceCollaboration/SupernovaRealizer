@@ -7,6 +7,9 @@ import asciitable
 import pickle
 import numpy
 from scipy.interpolate import griddata
+import os
+
+package_directory = os.path.dirname(os.path.abspath(__file__))
 
 class TabularSED(object):
     '''
@@ -38,7 +41,8 @@ class TabularSED(object):
         
     def luminosity(self, phase, wavelength):
         if (self.table is None):
-            f = open(self.name + '.pkl', 'rb')
+            filename=os.path.join(package_directory, self.name)
+            f = open(filename + '.pkl', 'rb')
             self.table = pickle.load(f)
         if (phase < self.table['points'][0][0] or phase > self.table['points'][-1][0] or wavelength < self.table['points'][0][1] or wavelength > self.table['points'][-1][1]):
             return 0

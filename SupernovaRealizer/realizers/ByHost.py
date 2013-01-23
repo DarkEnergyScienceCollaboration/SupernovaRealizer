@@ -81,7 +81,20 @@ class Where(object):
 
 class Realizer(object):
     '''
-    classdocs
+    Supernova realizer that generates objects given an input galaxy.  Supernovae are discovered
+    with uniform probability over a time window given a constant local rate.  Supernovae
+    are placed within a Gaussian distribution around the input gaalxy.  The supernova model
+    is based on the interpolation of tabular (phase,wavelength,flux) data.
+    
+    The realizer instantiation is specified by a set of parameters
+    
+     seed                        seed for random number generator
+     when.sim_start                start of time window in which SNe are generated
+     when.sim_end                    end of time window in which SNe are generated
+     where.radius                supernovae are randomly distributed in a Gaussian
+                                 distribution around the galaxy with this sigma
+     what.name                    name+'.pkl' is the file that contains (phase,wavelength,flux) information
+     what.normalization        normalization applied to the flux in the file to give luminosity
     '''
     parameter_names = ['seed']
     parameter_names+=(When.parameter_names+Where.parameter_names+TabularSED.TabularSED.parameter_names)
