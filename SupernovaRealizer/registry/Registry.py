@@ -3,24 +3,34 @@ Created on Jan 16, 2013
 
 @author: akim
 '''
+import SupernovaRealizer.realizers.ByHost
+import importlib
 
-from configobj import ConfigObj
+
+def load_file_registry():
+    registry_file='./external_registry.dat'
+    f = open(registry_file, 'r')
+    realizers=dict()
+    for line in f:
+        (modulename,realizername)=line.rsplit(".",1)
+        module=importlib.import_module(modulename)
+        realizer=getattr(module,realizername)
+        name=getattr(module,'name')
+        realizers[name]=realizer
+    f.close()
+    return realizers
 
 class Registry(object):
     '''
     classdocs
     '''
+    #realizers known programmatically
+    realizers=dict([(SupernovaRealizer.realizers.ByHost.name,SupernovaRealizer.realizers.ByHost.Realizer)])
 
-    configFileName='realizers.ini'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        #The registry contains a list of instances of Realizers and knows about arguments.
-        #This information is read it from a file.
-        
-        config = ConfigObj(Registry.configFileName)
-
-        
-        
+    #input registry
+    realizers.update(load_file_registry())
+    
+    @staticmethod    
+    def get_realizer(name,pars):
+        return Registry.realizers[name](pars)
+    

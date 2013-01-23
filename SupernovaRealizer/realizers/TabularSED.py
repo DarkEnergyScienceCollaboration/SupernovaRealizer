@@ -13,7 +13,7 @@ class TabularSED(object):
     classdocs
     '''
 
-    parameter_names = []
+    parameter_names = ['what.name','what.normalization']
     
     @staticmethod
     def ascii2pkl(name, phase):
@@ -27,11 +27,12 @@ class TabularSED(object):
         pickle.dump(out, f, pickle.HIGHEST_PROTOCOL)
         f.close()
         
-    def __init__(self, name):
+    def __init__(self, name, normalization):
         '''
         Constructor
         '''
         self.name = name
+        self.normalization=normalization
         self.table = None
         
         
@@ -41,4 +42,4 @@ class TabularSED(object):
             self.table = pickle.load(f)
         if (phase < self.table['points'][0][0] or phase > self.table['points'][-1][0] or wavelength < self.table['points'][0][1] or wavelength > self.table['points'][-1][1]):
             return 0
-        return griddata(self.table['points'], self.table['values'], (phase, wavelength), method='linear')
+        return self.normalization*griddata(self.table['points'], self.table['values'], (phase, wavelength), method='linear')

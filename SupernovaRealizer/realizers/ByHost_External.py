@@ -8,7 +8,7 @@ import Sources
 import TabularSED
 import numpy
 
-name='ByHost'
+name='ByHost_External'
 
 class RealizerContainer(object):
     def __init__(self, realizer, galaxy):
@@ -101,6 +101,7 @@ class Realizer(object):
         self.when = When(self.sim_start, self.sim_end)
         self.where = Where(self.radius)
         self.what = TabularSED.TabularSED(self.sedname, self.normalization)
+        
 
     def realize(self, galaxy):
 

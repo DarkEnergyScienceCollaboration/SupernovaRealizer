@@ -10,7 +10,7 @@ class Supernova(object):
     '''
 
 
-    def __init__(self,ra,dec,redshift,doe,model,name):
+    def __init__(self,ra,dec,redshift,doe,model,host,id):
         '''
         Constructor
         '''
@@ -19,7 +19,8 @@ class Supernova(object):
         self.doe=doe
         self.redshift=redshift
         self.model=model
-        self.id=name
+        self.host=host
+        self.id=id
         
     def luminosity(self,date,wavelength):
         return self.model.luminosity((date-self.doe)/(1+self.redshift),wavelength)
