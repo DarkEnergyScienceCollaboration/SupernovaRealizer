@@ -1,0 +1,85 @@
+This is a first proof-of-concept implementation of the supernova
+simulation registry and realizers.  The code is available in the git
+repository
+git@github.com:DarkEnergyScienceCollaboration/SupernovaRealizer.git
+and a sample executable is in SupernovaRealizer.registry.Test.py.
+
+-- The User Experience --
+
+There is a single Registry that provides the user access to their
+choice of Realizer.  The Realizer may be one that comes with the
+distribution or an external one.  Here there is ByHost.py that is
+programmatically specified in code, and ByHost_External.py whose
+location is listed in an ascii file registry.external_registry.dat.
+User-defined realizers can be created and made available for use just
+as ByHost_External.py.
+
+Anticipating that many simulations are specified through parameter
+files, the Test.py example reads in the realizer.ini file as a
+ConfigObj.  This configuration file specifies which Realizer to use
+and the parameters that specify its behavior.  Here is the snippet of
+code in Test.py that does this.
+
+    config=ConfigObj('realizer.ini',configspec='realizer_validation.ini')
+    realizername=config['Realizer']['name']
+    pars=config['Realizer']['parameters']
+
+With this information the Registry provides the user a realizer to
+use through the following command.
+
+    realizer=Registry.Registry.get_realizer(realizername, pars)
+
+The specific Registry implementation is guided by a perceived need by
+the LSST simulation group.  They have a catalog of simulated galaxies
+that populate a universe.  They want to realize supernovae associated
+with each of these galaxies.  Given a list of galaxies the realizer
+generates supernova realizations as
+
+    for galaxy in galaxies:
+        for sn in realizer.realize(galaxy):
+ 
+The realization process is deterministic, defined by a single random
+number generator seed that is a Realizer parameter and a unique galaxy
+identifier.
+
+This is pretty much all the simulator needs to do to realize
+supernovae associated with galaxies.
+
+-- Realizer Implementation --
+
+The implementation of the ByHost.py realizer was thrown together
+without much thought and is meant to test the Registry.  Its design is
+NOT good for general applicability.  I describe what the Realizer is
+doing to help you understand the example and seed ideas for a properly
+designed implementation.
+
+In ByHost, supernovae are realized on a per galaxy basis.  I
+decomposed the realization of supernova as a problem of What, Where,
+and When.
+
+My When is a constant supernova rate per galaxy in the restframe.  It
+is parameterized by when.sim_start and when.sim_end: the starting end
+ending dates simulated.  It is responsible for determining how many
+supernovae explode in the galaxy and on what dates.
+
+My Where is that supernovae occur in a Gaussian distribution around
+the input galaxy.  It is parameterized by where.radius, which is the
+standard deviation of the Gaussian.  It is responsible for determining
+supernova coordinates.
+
+My What is the underlying model for the supernova.  The model is the
+linear interpolation of a table of (phase,wavelength,flux) values.
+It is parameterized by what.name and what.normalization, the name
+of the file containing the tabulated values and the normalization
+needed to make the table a luminosity.
+
+ByHost contains objects for What, Where, When.  The What, Where, and
+When parameters are specified in the configuration file.  ByHost
+returns an iterator that returns supernova from a given galaxy.  Each
+supernova is created dynamically with the next() call.
+
+At the end of Test.py is the command that outputs some of the
+realized values.
+
+            print '   Supernova ',sn.ra, sn.dec, sn.redshift, sn.doe,\
+                      sn.id, sn.luminosity(sn.doe+30,5000)
