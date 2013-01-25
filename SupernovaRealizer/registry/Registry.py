@@ -8,15 +8,15 @@ import importlib
 
 
 def load_file_registry():
-    registry_file='./external_registry.dat'
+    registry_file = './external_registry.dat'
     f = open(registry_file, 'r')
-    realizers=dict()
+    realizers = dict()
     for line in f:
-        (modulename,realizername)=line.rsplit(".",1)
-        module=importlib.import_module(modulename)
-        realizer=getattr(module,realizername)
-        name=getattr(module,'name')
-        realizers[name]=realizer
+        (modulename, realizername) = line.rsplit(".", 1)
+        module = importlib.import_module(modulename)
+        realizer = getattr(module, realizername)
+        name = getattr(module, 'name')
+        realizers[name] = realizer
     f.close()
     return realizers
 
@@ -24,13 +24,12 @@ class Registry(object):
     '''
     classdocs
     '''
-    #realizers known programmatically
-    realizers=dict([(SupernovaRealizer.realizers.ByHost.name,SupernovaRealizer.realizers.ByHost.Realizer)])
+    # realizers known programmatically
+    realizers = dict([(SupernovaRealizer.realizers.ByHost.name, SupernovaRealizer.realizers.ByHost.Realizer)])
 
-    #input registry
+    # input registry
     realizers.update(load_file_registry())
-    
-    @staticmethod    
-    def get_realizer(name,pars):
-        return Registry.realizers[name](pars)
-    
+
+    @staticmethod
+    def get_realizer(name, args, pars):
+        return Registry.realizers[name](args, pars)
