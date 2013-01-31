@@ -27,14 +27,8 @@ class RealizerContainer(object):
         while not done:
             try:
                 thenext = self.sniterator.next()
-                if self.logical is None:
-                    done = True
-                    return thenext
-
-  #              print "next ",self.sniterator.galaxy.id
-                newlogical = 'thenext.' + self.logical
-                if eval(newlogical):
-                    done = True
+                if self.logical(thenext):
+                    done=True
                     return thenext
 
             except StopIteration as e1:
