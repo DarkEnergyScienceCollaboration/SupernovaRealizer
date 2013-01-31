@@ -31,7 +31,7 @@ if __name__ == '__main__':
     def logical(sn):
         return lambda : True
         
-    for sn in realizer.realize(logical):
+    for sn in realizer.realize(logical()):
         print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id'], sn.luminosity(sn.pars['doe']+30,5000)
 
     # get supernovae for one galaxy at a time
