@@ -31,5 +31,7 @@ class Registry(object):
     realizers.update(load_file_registry())
 
     @staticmethod
-    def get_realizer(name, args, pars):
-        return Registry.realizers[name](args, pars)
+    def get_realizer(config, args):
+        realizername = config['Realizer']['name']
+        pars = config['Realizer']['parameters']
+        return Registry.realizers[realizername](args, pars)

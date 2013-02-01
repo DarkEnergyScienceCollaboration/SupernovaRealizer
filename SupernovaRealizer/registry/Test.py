@@ -20,16 +20,15 @@ if __name__ == '__main__':
     config = ConfigObj('realizer.ini', configspec='realizer_validation.ini')
     validator = Validator()
     result = config.validate(validator)
-    realizername = config['Realizer']['name']
-    pars = config['Realizer']['parameters']
 
     # Choose the realizer based on what was in the configuration file
-    realizer = Registry.Registry.get_realizer(realizername, galaxies, pars)
+    # galaxies are a user arguement
+    realizer = Registry.Registry.get_realizer(config, galaxies)
 
     # get all supernovae
     print "All"
-    def logical(sn):
-        return lambda : True
+    def logical():
+        return lambda sn : True
         
     for sn in realizer.realize(logical()):
         print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id'], sn.luminosity(sn.pars['doe']+30,5000)
