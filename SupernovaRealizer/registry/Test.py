@@ -27,27 +27,19 @@ if __name__ == '__main__':
 
     # get all supernovae
     print "All"
-    def logical():
-        return lambda sn : True
-        
-    for sn in realizer.realize(logical()):
+    for sn in realizer.realize(lambda sn:True):
         print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id']#, sn.luminosity(sn.pars['doe']+30,5000)
 
     # get supernovae for one galaxy at a time
     print "By Galaxy ID"
-    def logical(id):
-        return lambda sn: id == sn.pars['host'].id
-    
+
     for galaxy in galaxies:
  #       print 'Galaxy id ',galaxy.id
-        for sn in realizer.realize(logical(galaxy.id)):
+        for sn in realizer.realize(lambda sn: sn.pars['host'].id == galaxy.id):
             print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id'] #, sn.luminosity(sn.pars['doe']+30,5000)
 
     # get supernovae by coordinates
     print "By SN coordinates"
- #       print 'Galaxy id ',galaxy.id
-    def logical():
-        return lambda sn: sn.pars['ra'] > 1.5
-    
-    for sn in realizer.realize(logical()):
+ #       print 'Galaxy id ',galaxy.id   
+    for sn in realizer.realize(lambda sn: sn.pars['ra']>1.5):
             print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id'] #, sn.luminosity(sn.pars['doe']+30,5000)
