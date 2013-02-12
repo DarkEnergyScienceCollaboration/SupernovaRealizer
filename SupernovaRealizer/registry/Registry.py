@@ -4,6 +4,7 @@ Created on Jan 16, 2013
 @author: akim
 '''
 import SupernovaRealizer.realizers.ByHost
+import SupernovaRealizer.realizers.MyRealizer_ByHost
 import importlib
 
 
@@ -25,7 +26,7 @@ class Registry(object):
     classdocs
     '''
     # realizers known programmatically
-    realizers = dict([(SupernovaRealizer.realizers.ByHost.name, SupernovaRealizer.realizers.ByHost.Realizer)])
+    realizers = dict([(SupernovaRealizer.realizers.ByHost.name, SupernovaRealizer.realizers.ByHost.Realizer), (SupernovaRealizer.realizers.MyRealizer_ByHost.name, SupernovaRealizer.realizers.MyRealizer_ByHost.Realizer)])
 
     # input registry
     realizers.update(load_file_registry())

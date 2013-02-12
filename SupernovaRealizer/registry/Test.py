@@ -17,7 +17,7 @@ if __name__ == '__main__':
         galaxies.append(SupernovaRealizer.realizers.Sources.Galaxy(1 + i * .1, 2 + i * .1, 0.1 + i * .1, i))
 
     # Read and validate configuration file that controls the simulation
-    config = ConfigObj('realizer.ini', configspec='realizer_validation.ini')
+    config = ConfigObj('realizer2.ini', configspec='realizer2_validation.ini')
     validator = Validator()
     result = config.validate(validator)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         return lambda sn : True
         
     for sn in realizer.realize(logical()):
-        print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id'], sn.luminosity(sn.pars['doe']+30,5000)
+        print '   Supernova ', sn.pars['ra'], sn.pars['dec'], sn.pars['redshift'], sn.pars['doe'], sn.pars['id']#, sn.luminosity(sn.pars['doe']+30,5000)
 
     # get supernovae for one galaxy at a time
     print "By Galaxy ID"

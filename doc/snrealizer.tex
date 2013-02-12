@@ -88,12 +88,13 @@ universe) by choosing one amongst a suite of realizers and specifying
 the parameters needed to specify the realization.  This is accomplished through a
 {\bf Registry}.
 
-The user is exposed to a realized universe through a registry interface as
+The user is exposed to a realizer that makes an instance of a universe through a registry interface as
 \begin{verbatim}
-RealizedUniverse Registry.getUniverse(RealizerName, RealizerParameters)
+Realizer Registry.get_realizer(config, args)
 \end{verbatim}
-where the RealizerName and RealizerParameters contain the set of information (including seed) needed
-to deterministically define the objects in the universe.   RealizerParameters is also
+where the config dictionary has the realizer name and parameters (including seed) and arg
+contains external inputs needed
+to deterministically define the objects in the universe.   Realizer parameters is also
 a good place to specify code version.
 
 The {\bf Registry} allows dynamic access to  {\bf Realizer}s by containing
@@ -110,28 +111,19 @@ Construction of the {\bf Realizer} should be light-weight as
 the {\bf Registry} has an object for each  {\bf Realizer}.
 The {\bf Realizer} satisfies the following interface:
 \begin{verbatim}
-RealizedUniverse Realizer.getUniverse(RealizerParameters)
-Map Realizer.parameters
+Iterator<Source> Realizer.realize(self, lambda)
+list Realizer.parameters
 \end{verbatim}
-getUniverse() is executed by {\bf Registry} when a {\bf RealizedUniverse} is requested.
-The user can use the parameters() command to get the names of parameters and
-default values for initialization.  We anticipate that one {\bf Realizer} implementation
+The user can use the parameters command to get the names of parameters and
+default values for initialization.  The lambda allows access to subsets, through
+algorithms that may be optimized within the realizer.  We anticipate that one {\bf Realizer} implementation
 will obtain sources that are preloaded into a database.
+The Realizer output represents a single realization of sources in the universe.
 
-The {\bf RealizedUniverse} represents a single realization of sources in the universe.
-Each source has an immutable unique integer label per RealizedUniverse.
+Each source has an immutable unique integer label.
 All independent queries return objects from the same underlying set; for example two
 queries of objects in different sky areas will return the same objects in the overlap
-region.  We anticipate accessors useful for users:
-\begin{verbatim}
-Iterator<Source> RealizedUniverse.getSNe()
-Iterator<Source> RealizedUniverse.getSNe(logical selection of SN parameters) //eg RA/Dec/time range
-Source RealizedUniverse.getSN(int)
-  /* Similar accessors for host galaxies */
-\end{verbatim}
-Generally each kind of {\bf Realizer}s will have an associated {\bf RealizedUniverse}
-with optimization of source retrieval.
-
+region. 
 The {\bf Source}s are supernovae and host galaxies that contain the information
 needed by simulators.  
 The following includes the API needed for simulations, though we

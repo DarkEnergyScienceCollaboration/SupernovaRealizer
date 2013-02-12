@@ -30,12 +30,13 @@ class TabularSED(object):
         pickle.dump(out, f, pickle.HIGHEST_PROTOCOL)
         f.close()
         
-    def __init__(self, name, normalization):
+    def __init__(self, pars):
         '''
         Constructor
         '''
-        self.name = name
-        self.normalization=normalization
+        
+        self.name = pars['filename']
+        self.normalization=pars['normalization']
         self.table = None
         
         
